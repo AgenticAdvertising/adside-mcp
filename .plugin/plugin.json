@@ -1,0 +1,6 @@
+{
+  "name": "adside",
+  "version": "1.0.0",
+  "description": "AI agents that manage paid ads across Meta, LinkedIn, and Google Ads from any MCP client.",
+  "mcpServers": "./mcp.json"
+}
