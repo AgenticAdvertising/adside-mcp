@@ -1,22 +1,18 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
   "name": "ai.adside/adside",
-  "description": "AI agents that manage paid ads on Meta, LinkedIn, and Google Ads from any MCP client.",
+  "description": "Run paid ads from any MCP client: Meta, Google Ads, LinkedIn, TikTok, Snapchat, Reddit and X.",
   "status": "active",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "websiteUrl": "https://www.adside.ai",
+  "repository": {
+    "url": "https://github.com/AgenticAdvertising/adside-mcp",
+    "source": "github"
+  },
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://api.adside.ai/mcp",
-      "headers": [
-        {
-          "name": "Authorization",
-          "description": "Bearer sk_live_... API key from your Adside account",
-          "isRequired": true,
-          "isSecret": true
-        }
-      ]
+      "url": "https://api.adside.ai/mcp"
     }
   ]
 }
