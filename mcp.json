@@ -1,10 +1,8 @@
 {
   "mcpServers": {
     "adside": {
-      "url": "https://api.adside.ai/mcp",
-      "headers": {
-        "Authorization": "Bearer sk_live_YOUR_KEY"
-      }
+      "type": "http",
+      "url": "https://api.adside.ai/mcp"
     }
   }
 }

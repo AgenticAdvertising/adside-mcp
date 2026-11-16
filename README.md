@@ -1,58 +1,95 @@
-# Adside MCP Server
+# Adside MCP server
 
-Official documentation and client configuration for the [Adside](https://www.adside.ai) MCP server —
-AI agents that manage paid ads on **Meta, LinkedIn, and Google Ads**, operable from any MCP client.
+Connect an AI assistant to your ad accounts. [Adside](https://www.adside.ai) runs a remote MCP server: add its URL to Claude, ChatGPT, Claude Code, Codex or any other MCP client, sign in, and your assistant can read and change campaigns on Meta, Google Ads, LinkedIn, TikTok, Snapchat, Reddit and X, and set up tracking in Google Tag Manager.
 
-- **Registry:** [`ai.adside/adside`](https://registry.modelcontextprotocol.io/v0/servers?search=ai.adside) on the official MCP Registry
-- **Endpoint:** `https://api.adside.ai/mcp` (streamable HTTP, JSON-RPC 2.0, stateless)
-- **Auth:** `Authorization: Bearer sk_live_…` — API key from your Adside account
-- **Docs:** https://docs.adside.ai/mcp-protocol
-
-## Quick start
-
-### Claude Code
-```bash
-claude mcp add --transport http adside https://api.adside.ai/mcp \
-  --header "Authorization: Bearer sk_live_YOUR_KEY"
+```text
+https://api.adside.ai/mcp
 ```
 
-### Any MCP client (JSON config)
+- **Transport:** Streamable HTTP. There is no standalone event stream.
+- **Sign-in:** OAuth 2.1 in your browser, with PKCE and dynamic client registration. Where there is no browser, a personal API key.
+- **Registry:** [`ai.adside/adside`](https://registry.modelcontextprotocol.io/v0/servers?search=ai.adside) on the official MCP Registry.
+- **Docs:** [docs.adside.ai/mcp/connect](https://docs.adside.ai/mcp/connect). Every docs page is also markdown: add `.md` to its URL.
+
+You need an Adside account with at least one workspace. To read or change campaigns on a platform, connect that platform to the workspace in Adside first.
+
+This repository holds the registry entry and the client configuration. The server itself is part of the Adside platform.
+
+## Connect
+
+**Claude Code**
+
+```bash
+claude mcp add --transport http adside https://api.adside.ai/mcp
+```
+
+Then type `/mcp` and sign in once.
+
+**Codex**
+
+```bash
+codex mcp add adside --url https://api.adside.ai/mcp
+```
+
+**Claude and ChatGPT**
+
+Add the URL as a custom connector and sign in. The steps for each, with screenshots, are in the [docs](https://docs.adside.ai/mcp/connect).
+
+**Any other MCP client**
+
 ```json
 {
   "mcpServers": {
     "adside": {
-      "type": "streamable-http",
-      "url": "https://api.adside.ai/mcp",
-      "headers": { "Authorization": "Bearer sk_live_YOUR_KEY" }
+      "type": "http",
+      "url": "https://api.adside.ai/mcp"
     }
   }
 }
 ```
 
-### Raw JSON-RPC
+## Without a browser
+
+In CI, a scheduled script or a cloud agent, send a personal API key in place of the sign-in. Create one in Adside, under Settings, then API keys. A key can be read only.
+
 ```bash
-curl -X POST https://api.adside.ai/mcp \
-  -H "Authorization: Bearer sk_live_YOUR_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":"1","method":"tools/list"}'
+claude mcp add --transport http adside https://api.adside.ai/mcp \
+  --header "Authorization: Bearer $ADSIDE_API_KEY"
 ```
 
-## What you can do
+Keys look like `adside_pat_` followed by 49 letters and digits. The setup for Codex, the Claude API, the OpenAI Responses API and n8n is in [Sign-in and API keys](https://docs.adside.ai/authentication).
 
-Adside's agents handle the operational side of paid advertising. Through MCP you can:
+## What your assistant can do
 
-- Research competitor and market ad creative
-- List and manage campaigns (e.g. `list_meta_campaigns`)
-- Build, organize, and bulk-import ad creative
-- Run day-to-day campaign operations across Meta, LinkedIn, and Google Ads
+| Area | Ask it to |
+| --- | --- |
+| Ad platforms | Read accounts, campaigns, ads, audiences and performance, and create or change them, on every platform the workspace has connected |
+| Reporting | Compare spend and CPA across platforms, rank creatives, keep saved reports |
+| Creatives | Brief, generate, edit and review creatives in your brand |
+| Launching | Upload ads in bulk |
+| Research | Track competitors, search ad libraries, save ads to boards |
+| Brain | Search and write what Adside knows about a workspace |
+| Routines | Schedule recurring work, such as a Monday report |
+| Ad comments | Read, reply to and hide comments |
 
-Per-channel routes are available (`/{source}/mcp` for `meta`, `linkedin`, `googleads`) — see the
-[protocol docs](https://docs.adside.ai/mcp-protocol).
+Three tools reach every connected ad platform, so your assistant does not load hundreds of tools it may not need: `search_channel_tools`, `describe_channel_tool` and `call_channel_tool`. The full list is in [What the Adside MCP server can do](https://docs.adside.ai/mcp/capabilities).
 
-## About
+A client that loads few tools can ask for some areas only: `https://api.adside.ai/mcp?features=reporting,brain`.
 
-Adside is a team of AI agents that manage your paid advertising — built for performance agencies
-and in-house teams. This repository hosts public docs and examples for the hosted MCP server; the
-server itself is part of the Adside platform.
+## Before a change
 
-Website: https://www.adside.ai · Docs: https://docs.adside.ai · Contact: rob@adside.ai
+Your assistant acts as you, with your role in Adside. A change that reaches people or is hard to undo takes two calls. The first changes nothing: Adside answers with a plain-language summary and a confirmation token. The second call, with the same input and the token, makes the change. Your assistant reads you the summary and asks before the second call. Every change to an ad platform works this way. See [Confirmations](https://docs.adside.ai/confirmations).
+
+An agent that runs with nobody watching answers its own confirmations. Give it a read-only API key unless its job is to make changes.
+
+## Also
+
+- **The `adside` CLI** reads your ad accounts, generates images and video, and writes reports from a terminal: `npm install -g adside`. See [Install the adside CLI](https://docs.adside.ai/cli/install).
+- **The plugin for Claude Code and Codex** sets up the CLI skills and this server together: [AgenticAdvertising/adside-plugin](https://github.com/AgenticAdvertising/adside-plugin).
+- **For an AI agent deciding whether to use Adside**, one page: [adside.ai/agents.md](https://www.adside.ai/agents.md).
+
+## Pricing
+
+$290 per brand, per month, with $100 of creative credits included, for as many people and agents as you like. There is a 7-day free trial. See [pricing](https://www.adside.ai/pricing).
+
+Questions: [support@adside.ai](mailto:support@adside.ai)
